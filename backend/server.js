@@ -2,9 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const User = require("./models/User")
+const User = require("./models/User");
 const reviewRoutes = require("./routes/reviewRoutes");
-
+const recommendationRoutes = require('./routes/recommendation');
+const socketIo = require('socket.io');
+const http = require('http');
 
 dotenv.config();
 const app = express();
@@ -14,8 +16,6 @@ app.use(express.json());
 // routes placing 
 const orderRoutes = require("./routes/orderRoutes");
 const itemRoutes = require("./routes/itemRoutes");
-
-
 
 const connectDB = async () => {
   try {
@@ -32,21 +32,34 @@ const connectDB = async () => {
 
 connectDB();
 
+// Create the server and initialize Socket.io
+const server = http.createServer(app);
+const io = socketIo(server);
+
 // routing placing completess here 
 app.use("/api/orders", orderRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use('/api', recommendationRoutes); 
 
 app.get("/", (req, res) => res.send("API is running..."));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
+// Socket.io connection
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
 
+  // Emit an event to notify all connected clients about a new order (example)
+  socket.emit('newNotification', { message: 'A new order has been placed!' });
+});
 
-
-// testing -1  [done ]
-
+// testing -1 [done]
 app.post("/api/users", async (req, res) => {
   try {
     const user = new User(req.body);
@@ -71,5 +84,10 @@ app.post('/test', (req, res) => {
   }
 });
 
-
-// 
+app.post('/api/reviews', (req, res) => {
+  console.log(req.body); // Debugging line
+  if (!req.body.title || !req.body.description || !req.body.rating) {
+      return res.status(400).json({ message: "All fields are required." });
+  }
+  // Proceed with saving data...
+});
