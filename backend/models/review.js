@@ -1,14 +1,15 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
-    comment: {
-      type: String,
+    item: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Item',
       required: true,
     },
     rating: {
@@ -17,10 +18,13 @@ const reviewSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
+    comment: {
+      type: String,
+      required: true,
+      maxlength: 500,
+    },
   },
-  {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
-  }
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("Review", reviewSchema);
+module.exports = mongoose.model('Review', reviewSchema);

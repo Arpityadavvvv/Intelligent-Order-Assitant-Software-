@@ -3,8 +3,7 @@ const router = express.Router();
 const Order = require("../models/order"); // Order model
 const Joi = require("joi"); // Joi validation
 
-
-// Order schema for validationn
+// Order schema for validation
 const orderSchema = Joi.object({
   userId: Joi.string().required(),
   products: Joi.array().items(Joi.object({
